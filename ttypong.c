@@ -1,48 +1,4 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <ncurses.h>
-
-/* Options */
-#define FH 20
-#define FW 60
-#define RACKETL 3
-#define TIMEDELAY 40
-#define BALL '0'
-
-/* Constantes / Macros */
-#define GX ((COLS / 2) - (FW / 2))
-#define GY ((LINES / 2) - (FH / 2)) - 1
-#define COL(x)    attron(COLOR_PAIR(x))
-#define UNCOL(x)  attroff(COLOR_PAIR(x))
-
-/* Structure principal */
-typedef struct
-{
-     int running;
-
-     struct
-     {
-          int x, y;
-          int a, b;
-     } ball;
-
-     struct
-     {
-          int x, iax;
-     } racket;
-
-} Pong;
-
-Pong *pong;
-
-/* Prototypes */
-void init_curses(void);
-void init_frame(void);
-void key_event(void);
-void manage_ball(void);
-void racket_move(int x);
-void ia_racket(void);
-
+#include "ttypong.h"
 
 void
 init_curses(void)
@@ -111,11 +67,11 @@ key_event(void)
      switch((c = getch()))
      {
           case KEY_UP:
-               racket_move(pong->racket.x - 1);
+               racket_move(pong->racket.y - 1);
                break;
 
           case KEY_DOWN:
-               racket_move(pong->racket.x + 1);
+               racket_move(pong->racket.y + 1);
                break;
 
                /* Touche q ou Q pour quitter */
@@ -163,21 +119,21 @@ manage_ball(void)
 
 /* Movement de la raquette */
 void
-racket_move(int x)
+racket_move(int y)
 {
      int i;
 
-     if(x <= 0 || x > FH - RACKETL)
+     if(y <= 0 || y > FH - RACKETL)
           return;
 
-     pong->racket.x = x;
+     pong->racket.y = y;
 
      for(i = 1; i < FH; ++i)
           mvaddch(i, GX, ' ');
 
      COL(1);
 
-     for(i = x; i < x + RACKETL; ++i)
+     for(i = y; i < y + RACKETL; ++i)
           mvaddch(i, GX, ' ');
      UNCOL(1);
 
@@ -191,12 +147,12 @@ ia_racket(void)
 {
      int i;
 
-     pong->racket.iax = pong->ball.y - (RACKETL / 2);
+     pong->racket.iay = pong->ball.y - (RACKETL / 2);
 
      if(pong->ball.y < 4)
-          ++pong->racket.iax;
+          ++pong->racket.iay;
      if(pong->ball.y > FH - 3)
-          --pong->racket.iax;
+          --pong->racket.iay;
 
      for(i = 1; i < FH; ++i)
           mvaddch(i, GX + FW, ' ');
@@ -204,7 +160,7 @@ ia_racket(void)
      COL(1);
 
      for(i = 0; i < RACKETL; ++i)
-          mvaddch(i + pong->racket.iax, GX + FW, ' ');
+          mvaddch(i + pong->racket.iay, GX + FW, ' ');
 
      UNCOL(1);
 
