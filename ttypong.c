@@ -101,16 +101,14 @@ key_event(void)
 void
 manage_ball(void)
 {
-     if(pong->ball.x < 2)
-          pong->ball.a = 1;
-     if(pong->ball.x > FW - 2)
-          pong->ball.a = -1;
-     if(pong->ball.y < 2)
-          pong->ball.b = 1;
-     if(pong->ball.y > FH - 2)
-          pong->ball.b = -1;
+     if(pong->ball.x < 2
+        || pong->ball.x > FW - 2)
+          pong->ball.a = -pong->ball.a;
+     if(pong->ball.y < 2
+        || pong->ball.y > FH - 2)
+          pong->ball.b = -pong->ball.b;
 
-     /* On efface la bale à son ancienne position */
+     /* On efface la balle à son ancienne position */
      pong->frame[pong->ball.y][pong->ball.x] = 0;
 
      pong->ball.x += pong->ball.a;
@@ -127,18 +125,35 @@ manage_ball(void)
 void
 racket_move(int y)
 {
-     int i;
+     int i, offset = y - pong->racket.y;
 
      if(y <= 0 || y > FH - RACKETL)
           return;
 
+     if(offset >= RACKETL
+        || offset <= -RACKETL)
+     {
+         for(i = pong->racket.y; i < pong->racket.y + RACKETL; ++i)
+             pong->frame[i][0] = 0;
+         for(i = y; i < y + RACKETL; ++i)
+             pong->frame[i][0] = RACKET;
+     }
+     else if(offset > 0)
+     {
+         for(i = pong->racket.y; i < y; ++i)
+            pong->frame[i][0] = 0;
+         for(i = pong->racket.y + RACKETL; i < y + RACKETL; ++i)
+            pong->frame[i][0] = RACKET;
+     }
+     else
+     {
+         for(i = y + RACKETL; i < pong->racket.y + RACKETL; ++i)
+             pong->frame[i][0] = 0;
+         for(i = y; i < pong->racket.y; ++i)
+             pong->frame[i][0] = RACKET;
+     }
+
      pong->racket.y = y;
-
-     for(i = 1; i < FH; ++i)
-          pong->frame[i][0] = 0;
-
-     for(i = y; i < y + RACKETL; ++i)
-          pong->frame[i][0] = RACKET;
 
      return;
 
