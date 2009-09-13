@@ -37,11 +37,11 @@ init_frame(void)
 {
      int i, j;
 
-     for(i = 0; i < FH; ++i)
-          for(j = 0; j < FW; ++j)
+     for(i = 0; i <= FH; ++i)
+          for(j = 0; j <= FW; ++j)
                pong->frame[i][j] = 0;
 
-     for(i = 0; i < FW; ++i)
+     for(i = 0; i <= FW; ++i)
           pong->frame[0][i] = pong->frame[FH][i] = WALL;
 
      racket_move((FH / 2) - RACKETL / 2 - 1);
@@ -54,8 +54,8 @@ draw_frame(void)
 {
      int i, j;
 
-     for(i = 0; i < FH + 1; ++i)
-          for(j = 0; j < FW + 1; ++j)
+     for(i = 0; i <= FH; ++i)
+          for(j = 0; j <= FW; ++j)
           {
                COL(pong->frame[i][j]);
                mvaddch(i, j + GX, ((pong->frame[i][j] == BALL) ? 'O' : ' '));
@@ -173,7 +173,7 @@ ia_racket(void)
           --pong->racket.iay;
 
      for(i = 1; i < FH; ++i)
-         pong->frame[i][FW] = 0;
+          pong->frame[i][FW] = 0;
 
      for(i = 0; i < RACKETL; ++i)
           pong->frame[i + pong->racket.iay][FW] = RACKET;
@@ -193,6 +193,7 @@ main(int argc, char **argv)
      pong->ball.b = -1;
      pong->ball.x = 10;
      pong->ball.y = 10;
+     pong->racket.y = 1;
 
      init_curses();
      init_frame();
