@@ -25,7 +25,7 @@ init_curses(void)
      init_pair(0, COLOR_GREEN, bg);
      init_pair(BALL,   COLOR_WHITE, bg);
      init_pair(WALL,   COLOR_WHITE, COLOR_WHITE);
-     init_pair(RACKET, bg, COLOR_WHITE);
+     init_pair(RACKET, bg, COLOR_GREEN);
      init_pair(OUT,    bg, bg);
 
      return;
