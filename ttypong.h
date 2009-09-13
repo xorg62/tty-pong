@@ -7,7 +7,12 @@
 #define FW 60
 #define RACKETL 3
 #define TIMEDELAY 40
-#define BALL '0'
+
+/* Const */
+#define BALL   1
+#define WALL   2
+#define RACKET 3
+#define OUT    4
 
 /* Macros */
 #define GX ((COLS / 2) - (FW / 2))
@@ -19,6 +24,7 @@
 typedef struct
 {
      int running;
+     int frame[FH + 1][FW + 1];
 
      struct
      {

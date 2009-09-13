@@ -22,9 +22,11 @@ init_curses(void)
 
      start_color();
      bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK;
-     init_pair(0, bg, bg);
-     init_pair(1, COLOR_WHITE, COLOR_WHITE);
-     init_pair(2, COLOR_GREEN, bg);
+     init_pair(0, COLOR_GREEN, bg);
+     init_pair(BALL,   COLOR_WHITE, bg);
+     init_pair(WALL,   COLOR_WHITE, COLOR_WHITE);
+     init_pair(RACKET, bg, COLOR_WHITE);
+     init_pair(OUT,    bg, bg);
 
      return;
 }
@@ -33,28 +35,32 @@ init_curses(void)
 void
 init_frame(void)
 {
-     int i;
+     int i, j;
 
-     COL(1);
+     for(i = 0; i < FH; ++i)
+          for(j = 0; j < FW; ++j)
+               pong->frame[i][j] = 0;
 
-     for(i = GX; i < FW + GX; ++i)
-     {
-          mvaddch(0, i, '-');
-          mvaddch(FH, i, '-');
-     }
-
-     UNCOL(1);
-
-     COL(2);
-
-     for(i = 1; i < FH; ++i)
-          mvaddch(i, (FW / 2) + GX, '|');
-
-     UNCOL(2);
+     for(i = 0; i < FW; ++i)
+          pong->frame[0][i] = pong->frame[FH][i] = WALL;
 
      racket_move((FH / 2) - RACKETL / 2 - 1);
 
-     refresh();
+     return;
+}
+
+void
+draw_frame(void)
+{
+     int i, j;
+
+     for(i = 0; i < FH + 1; ++i)
+          for(j = 0; j < FW + 1; ++j)
+          {
+               COL(pong->frame[i][j]);
+               mvaddch(i, j + GX, ((pong->frame[i][j] == BALL) ? 'O' : ' '));
+               UNCOL(pong->frame[i][j]);
+          }
 
      return;
 }
@@ -95,9 +101,9 @@ key_event(void)
 void
 manage_ball(void)
 {
-     if(pong->ball.x < 1)
+     if(pong->ball.x < 2)
           pong->ball.a = 1;
-     if(pong->ball.x > FW - 1)
+     if(pong->ball.x > FW - 2)
           pong->ball.a = -1;
      if(pong->ball.y < 2)
           pong->ball.b = 1;
@@ -105,12 +111,12 @@ manage_ball(void)
           pong->ball.b = -1;
 
      /* On efface la bale à son ancienne position */
-     mvaddch(pong->ball.y, pong->ball.x + GX, ' ');
+     pong->frame[pong->ball.y][pong->ball.x] = 0;
 
      pong->ball.x += pong->ball.a;
      pong->ball.y += pong->ball.b;
 
-     mvaddch(pong->ball.y, pong->ball.x + GX, BALL);
+     pong->frame[pong->ball.y][pong->ball.x] = BALL;
 
      refresh();
 
@@ -129,13 +135,10 @@ racket_move(int y)
      pong->racket.y = y;
 
      for(i = 1; i < FH; ++i)
-          mvaddch(i, GX, ' ');
-
-     COL(1);
+          pong->frame[i][0] = 0;
 
      for(i = y; i < y + RACKETL; ++i)
-          mvaddch(i, GX, ' ');
-     UNCOL(1);
+          pong->frame[i][0] = RACKET;
 
      return;
 
@@ -155,14 +158,10 @@ ia_racket(void)
           --pong->racket.iay;
 
      for(i = 1; i < FH; ++i)
-          mvaddch(i, GX + FW, ' ');
-
-     COL(1);
+         pong->frame[i][FW] = 0;
 
      for(i = 0; i < RACKETL; ++i)
-          mvaddch(i + pong->racket.iay, GX + FW, ' ');
-
-     UNCOL(1);
+          pong->frame[i + pong->racket.iay][FW] = RACKET;
 
      return;
 }
@@ -195,6 +194,7 @@ main(int argc, char **argv)
                time = 0;
           }
 
+          draw_frame();
           usleep(1000);
      }
 
