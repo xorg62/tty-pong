@@ -1,6 +1,6 @@
 files = ttypong.c
 
-ttypong : $(files) -lncurses
+ttypong : $(files) ttypong.h -lncurses
 	    cc -o ttypong $(files) -lncurses
 
 .PHONY : clean
